@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HSB – Diego Yugueros</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--black:#0a0a0a;--white:#fff;--red:#d4001a;--yellow:#f5c800;--gray:#f9f9f9;--gray2:#e8e8e8;--gray3:#888;--radius:6px;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--black);background:var(--white);line-height:1.4;-webkit-font-smoothing:antialiased;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);border-bottom:2px solid var(--black);padding:0 2.5rem;}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.nav-logo{font-size:22px;font-weight:900;letter-spacing:-1px;color:var(--black);cursor:pointer;}
+.nav-logo span{color:var(--red);}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{text-decoration:none;font-size:13px;color:var(--black);font-weight:700;cursor:pointer;}
+.nav-links a:hover{color:var(--red);}
+.nav-cta{background:var(--red);color:var(--white);border:none;padding:10px 24px;border-radius:var(--radius);font-size:13px;font-weight:800;cursor:pointer;}
+#landing-page{display:block;}
+#auth-page{display:none;min-height:100vh;background:var(--gray);padding:80px 2rem 2rem;align-items:center;justify-content:center;}
+#dashboard-page{display:none;min-height:100vh;background:var(--gray);}
+#faq-page{display:none;padding-top:80px;min-height:100vh;}
+section{padding:90px 2.5rem;background:var(--white);}
+.container{max-width:1100px;margin:0 auto;}
+.tag{display:inline-block;background:var(--yellow);color:var(--black);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:3px;margin-bottom:1.25rem;}
+.section-title{font-size:clamp(30px,4vw,50px);font-weight:900;letter-spacing:-2px;line-height:0.95;margin-bottom:1.5rem;}
+.section-title .red{color:var(--red);}
+#hero-section{min-height:100vh;display:flex;align-items:center;border-bottom:2px solid var(--black);padding:0 2.5rem;}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-img{border-radius:16px;overflow:hidden;aspect-ratio:4/5;}
+.hero-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:2rem;}
+.hero-eyebrow-dot{width:8px;height:8px;background:var(--red);border-radius:50%;}
+.hero-eyebrow-text{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--red);}
+.hero-title{font-size:clamp(52px,7vw,96px);font-weight:900;letter-spacing:-4px;line-height:0.88;margin-bottom:2rem;}
+.hero-title .red{color:var(--red);}
+.hero-subtitle{font-size:18px;color:var(--gray3);line-height:1.6;max-width:560px;margin-bottom:3rem;font-weight:500;}
+.hero-ctas{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.btn-red{background:var(--red);color:var(--white);border:none;padding:16px 36px;border-radius:var(--radius);font-size:15px;font-weight:800;cursor:pointer;}
+.btn-red:hover{background:#b00016;}
+.btn-outline{background:var(--white);color:var(--black);border:2px solid var(--black);padding:14px 32px;border-radius:var(--radius);font-size:15px;font-weight:800;cursor:pointer;}
+.btn-outline:hover{background:var(--black);color:var(--white);}
+.hero-stats{display:flex;gap:48px;margin-top:4rem;padding-top:3rem;border-top:1px solid var(--gray2);flex-wrap:wrap;}
+.hero-stat-num{font-size:42px;font-weight:900;letter-spacing:-2px;line-height:1;}
+.hero-stat-num span{color:var(--red);}
+.hero-stat-label{font-size:12px;color:var(--gray3);font-weight:700;margin-top:6px;text-transform:uppercase;letter-spacing:1px;}
+#sobre-section{border-bottom:1px solid var(--gray2);}
+.sobre-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.sobre-name{font-size:clamp(36px,4vw,56px);font-weight:900;letter-spacing:-2px;line-height:0.95;margin-bottom:.5rem;}
+.sobre-name span{color:var(--red);}
+.sobre-role{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);margin-bottom:2rem;}
+.sobre-text p{font-size:16px;color:#444;line-height:1.8;margin-bottom:1.25rem;}
+.sobre-text strong{color:var(--black);}
+.sobre-nums{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--gray2);border:1px solid var(--gray2);border-radius:8px;overflow:hidden;}
+.sobre-num-item{background:var(--white);padding:1.5rem;text-align:center;}
+.sobre-num-big{font-size:36px;font-weight:900;letter-spacing:-1px;}
+.sobre-num-big span{color:var(--red);}
+.sobre-num-label{font-size:11px;color:var(--gray3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+#para-quien-section{border-bottom:1px solid var(--gray2);}
+.pq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--gray2);border:1px solid var(--gray2);border-radius:10px;overflow:hidden;margin-top:3rem;}
+.pq-card{background:var(--white);padding:2rem;}
+.pq-icon{font-size:28px;margin-bottom:1rem;}
+.pq-title{font-size:16px;font-weight:800;margin-bottom:.75rem;}
+.pq-desc{font-size:14px;color:#555;line-height:1.6;}
+#metodo-section{border-bottom:1px solid var(--gray2);}
+.metodo-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--gray2);border:1px solid var(--gray2);border-radius:10px;overflow:hidden;margin-top:3rem;}
+.metodo-step{background:var(--white);padding:2rem;}
+.metodo-num{font-size:36px;font-weight:900;color:var(--red);letter-spacing:-1px;margin-bottom:1rem;line-height:1;}
+.metodo-title{font-size:16px;font-weight:800;margin-bottom:.75rem;}
+.metodo-desc{font-size:13px;color:#555;line-height:1.6;}
+#testimonios-section{border-bottom:1px solid var(--gray2);}
+.t-filters{display:flex;gap:8px;margin-bottom:2.5rem;flex-wrap:wrap;}
+.filter-btn{background:var(--white);border:1px solid var(--gray2);padding:8px 20px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;}
+.filter-btn.active,.filter-btn:hover{background:var(--black);color:var(--white);border-color:var(--black);}
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.t-card{border:1px solid var(--gray2);border-radius:10px;padding:1.75rem;}
+.t-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;}
+.t-name{font-size:15px;font-weight:800;}
+.t-age{font-size:12px;color:var(--gray3);font-weight:600;margin-top:2px;}
+.t-result{background:var(--red);color:var(--white);padding:6px 12px;border-radius:100px;font-size:12px;font-weight:800;white-space:nowrap;}
+.t-text{font-size:14px;color:#555;line-height:1.7;}
+#cta-section{border-top:2px solid var(--black);text-align:center;position:relative;}
+#cta-section .container{position:relative;z-index:1;}
+.cta-sub{font-size:17px;color:var(--gray3);max-width:520px;margin:0 auto 3rem;}
+footer{background:var(--black);color:#666;padding:2.5rem;text-align:center;font-size:13px;}
+footer a{color:#888;margin:0 1rem;cursor:pointer;text-decoration:none;}
+footer a:hover{color:var(--white);}
+.auth-box{background:var(--white);border:2px solid var(--black);border-radius:12px;padding:2.5rem;width:100%;max-width:420px;margin:0 auto;}
+.auth-logo{font-size:22px;font-weight:900;letter-spacing:-1px;margin-bottom:.25rem;}
+.auth-logo span{color:var(--red);}
+.auth-sub{font-size:13px;color:var(--gray3);margin-bottom:2rem;}
+.auth-tabs{display:flex;border-bottom:2px solid var(--black);margin-bottom:2rem;}
+.auth-tab{flex:1;background:none;border:none;padding:.875rem;font-size:14px;font-weight:700;cursor:pointer;color:var(--gray3);border-bottom:3px solid transparent;margin-bottom:-2px;}
+.auth-tab.active{color:var(--black);border-bottom-color:var(--red);}
+.form-group{margin-bottom:1.25rem;}
+.form-label{display:block;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem;}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--gray2);border-radius:var(--radius);font-size:15px;font-family:inherit;outline:none;}
+.form-input:focus{border-color:var(--black);}
+.btn-full{width:100%;padding:15px;background:var(--black);color:var(--white);border:none;border-radius:var(--radius);font-size:16px;font-weight:800;cursor:pointer;margin-top:.5rem;display:block;}
+.btn-full:hover{background:var(--red);}
+.auth-error{background:#fff0f0;color:var(--red);border:1px solid #ffcccc;border-radius:var(--radius);padding:10px 14px;font-size:13px;font-weight:700;margin-bottom:1rem;display:none;}
+.auth-switch{text-align:center;margin-top:1.5rem;font-size:13px;color:var(--gray3);}
+.auth-switch a{color:var(--red);font-weight:800;cursor:pointer;}
+.dash-header{background:var(--white);border-bottom:2px solid var(--black);padding:0 1.5rem;position:sticky;top:0;z-index:50;}
+.dash-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px;gap:8px;}
+.dash-logo{font-size:17px;font-weight:900;white-space:nowrap;}
+.dash-logo span{color:var(--red);}
+.dash-nav{display:flex;gap:2px;flex-wrap:wrap;}
+.dash-nav-btn{background:none;border:none;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;color:var(--gray3);white-space:nowrap;}
+.dash-nav-btn.active{background:var(--black);color:var(--white);}
+.dash-nav-btn:hover{background:var(--gray2);color:var(--black);}
+.dash-nav-btn.active:hover{background:var(--black);color:var(--white);}
+.dash-logout{background:none;border:1px solid var(--gray2);padding:6px 14px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.dash-logout:hover{border-color:var(--red);color:var(--red);}
+.dash-content{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+.dash-section{display:none;}
+.dash-section.active{display:block;}
+.dash-welcome{margin-bottom:1.5rem;}
+.dash-welcome h2{font-size:26px;font-weight:900;letter-spacing:-1px;}
+.dash-welcome p{color:var(--gray3);margin-top:.4rem;font-size:14px;}
+.campus-tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:2px solid var(--gray2);}
+.campus-tab{background:none;border:none;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;color:var(--gray3);border-bottom:3px solid transparent;margin-bottom:-2px;}
+.campus-tab.active{color:var(--black);border-bottom-color:var(--red);}
+.campus-panel{display:none;}
+.campus-panel.active{display:block;}
+.video-filters{display:flex;gap:8px;margin-bottom:2rem;flex-wrap:wrap;}
+.videos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.video-card{background:var(--white);border-radius:10px;overflow:hidden;border:1px solid var(--gray2);cursor:pointer;}
+.video-card:hover{border-color:var(--black);}
+.video-thumb{aspect-ratio:16/9;background:var(--black);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.video-play{width:52px;height:52px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+.video-play::after{content:'';border-left:18px solid var(--white);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px;}
+.video-cat-badge{position:absolute;top:10px;left:10px;background:var(--yellow);color:var(--black);font-size:10px;font-weight:800;padding:3px 8px;border-radius:3px;z-index:1;}
+.video-info{padding:1.25rem;}
+.video-title{font-size:15px;font-weight:700;margin-bottom:.5rem;}
+.video-meta{font-size:12px;color:var(--gray3);font-weight:600;}
+.video-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;align-items:center;justify-content:center;padding:2rem;}
+.video-modal.open{display:flex;}
+.video-modal-inner{background:var(--white);border-radius:12px;width:100%;max-width:900px;overflow:hidden;}
+.video-modal-header{padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray2);}
+.video-modal-title{font-size:17px;font-weight:800;}
+.video-modal-close{background:none;border:none;font-size:32px;cursor:pointer;color:var(--gray3);line-height:1;}
+.video-embed{aspect-ratio:16/9;background:var(--black);}
+.video-embed iframe{width:100%;height:100%;border:none;}
+.pdfs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.pdf-card{background:var(--white);border:1px solid var(--gray2);border-radius:10px;padding:1.5rem;display:flex;flex-direction:column;gap:.75rem;}
+.pdf-icon{font-size:32px;}
+.pdf-title{font-size:15px;font-weight:800;}
+.pdf-desc{font-size:13px;color:var(--gray3);line-height:1.5;flex:1;}
+.pdf-btn{background:var(--black);color:var(--white);border:none;padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;text-align:center;display:block;text-decoration:none;}
+.pdf-btn:hover{background:var(--red);}
+.macros-card{background:var(--white);border:1px solid var(--gray2);border-radius:12px;padding:2rem;margin-bottom:1.5rem;}
+.macros-card h3{font-size:18px;font-weight:800;margin-bottom:1.5rem;}
+.macro-row{display:flex;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--gray2);gap:1rem;}
+.macro-row:last-child{border-bottom:none;}
+.macro-label{font-size:14px;font-weight:700;width:130px;flex-shrink:0;}
+.macro-bar-wrap{flex:1;height:8px;background:var(--gray2);border-radius:4px;overflow:hidden;}
+.macro-bar-fill{height:100%;background:var(--red);border-radius:4px;}
+.macro-val{font-size:18px;font-weight:900;color:var(--red);width:80px;text-align:right;flex-shrink:0;}
+.macro-unit{font-size:12px;color:var(--gray3);font-weight:600;margin-left:2px;}
+.macros-empty{text-align:center;padding:3rem;color:var(--gray3);background:var(--white);border:1px solid var(--gray2);border-radius:12px;}
+.admin-tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:2px solid var(--gray2);}
+.admin-tab{background:none;border:none;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;color:var(--gray3);border-bottom:3px solid transparent;margin-bottom:-2px;}
+.admin-tab.active{color:var(--black);border-bottom-color:var(--red);}
+.admin-panel{display:none;}
+.admin-panel.active{display:block;}
+.admin-card{background:var(--white);border-radius:10px;padding:1.75rem;border:1px solid var(--gray2);margin-bottom:1.5rem;}
+.admin-card h3{font-size:17px;font-weight:800;margin-bottom:1.5rem;}
+.admin-form-group{margin-bottom:1rem;}
+.admin-label{display:block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
+.admin-input,.admin-select,.admin-textarea{width:100%;padding:9px 12px;border:1px solid var(--gray2);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none;}
+.admin-textarea{min-height:80px;resize:vertical;}
+.btn-admin{background:var(--black);color:var(--white);border:none;padding:10px 20px;border-radius:var(--radius);font-size:13px;font-weight:800;cursor:pointer;margin-top:.5rem;}
+.btn-admin:hover{background:var(--red);}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:.875rem 0;border-bottom:1px solid var(--gray2);}
+.item-name{font-size:14px;font-weight:700;}
+.item-sub{font-size:12px;color:var(--gray3);margin-top:2px;}
+.btn-del{background:none;border:1px solid #ffcccc;color:var(--red);padding:5px 12px;border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;}
+.admin-two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.loading{text-align:center;padding:3rem;color:var(--gray3);font-size:15px;}
+.faq-hero{background:var(--white);border-bottom:2px solid var(--black);padding:60px 2.5rem;text-align:center;}
+.faq-list{max-width:760px;margin:0 auto;padding:3rem 2.5rem;}
+.faq-item{border-bottom:1px solid var(--gray2);cursor:pointer;}
+.faq-question{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 0;font-size:17px;font-weight:700;}
+.faq-arrow{font-size:22px;transition:transform .2s;color:var(--red);}
+.faq-item.open .faq-arrow{transform:rotate(45deg);}
+.faq-answer{font-size:15px;color:#555;line-height:1.8;padding-bottom:1.5rem;display:none;}
+.faq-item.open .faq-answer{display:block;}
+
+/* ===== EJERCICIOS ===== */
+#dash-ejercicios{font-family:'Inter',system-ui,sans-serif;}
+.ej-wrap{display:flex;height:calc(100vh - 110px);background:#f5f5f5;border-radius:12px;overflow:hidden;border:1px solid var(--gray2);}
+.ej-sidebar{width:160px;background:#141414;padding:10px 7px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;overflow-y:auto;}
+.ej-sidebar-label{color:#555;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin:4px 8px 6px;}
+.ej-sidebar-btn{background:transparent;color:#999;border:none;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left;font-size:12px;font-family:inherit;font-weight:400;transition:all .15s;}
+.ej-sidebar-btn.active{background:var(--red);color:#fff;font-weight:700;}
+.ej-sidebar-div{border-top:1px solid #2a2a2a;margin:6px 4px;}
+.ej-sidebar-equip{background:transparent;color:#888;border:1px solid transparent;border-radius:6px;padding:7px 10px;cursor:pointer;text-align:left;font-size:12px;font-family:inherit;font-weight:400;transition:all .15s;}
+.ej-sidebar-equip.active{color:var(--red);border-color:#d4001a44;font-weight:600;}
+.ej-sidebar-warmup{background:transparent;color:#777;border:1px solid transparent;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left;font-size:12px;font-family:inherit;font-weight:600;margin-top:4px;transition:all .15s;}
+.ej-sidebar-warmup.active{background:#d4001a18;color:var(--red);border-color:#d4001a33;}
+.ej-list{width:210px;background:#fff;border-right:1px solid var(--gray2);display:flex;flex-direction:column;flex-shrink:0;}
+.ej-list-tabs{display:flex;border-bottom:1px solid var(--gray2);}
+.ej-list-tab{flex:1;padding:9px 0;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-size:11px;font-weight:700;color:var(--gray3);font-family:inherit;}
+.ej-list-tab.active{color:var(--red);border-bottom-color:var(--red);}
+.ej-list-search{padding:10px;border-bottom:1px solid var(--gray2);}
+.ej-list-search input{width:100%;font-size:12px;padding:6px 9px;border-radius:6px;border:1px solid var(--gray2);font-family:inherit;outline:none;}
+.ej-list-levels{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+.ej-list-levels button{font-size:10px;padding:3px 7px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;font-weight:600;}
+.ej-list-count{font-size:10px;color:var(--gray3);margin-top:4px;}
+.ej-list-items{overflow-y:auto;flex:1;}
+.ej-list-item{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 12px;background:transparent;border:none;border-bottom:1px solid var(--gray2);cursor:pointer;text-align:left;font-size:12px;line-height:1.4;color:var(--black);font-family:inherit;gap:6px;transition:background .1s;}
+.ej-list-item.active{background:var(--red);color:#fff;}
+.ej-list-item .lvl-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;flex-shrink:0;}
+.ej-detail{flex:1;overflow-y:auto;padding:20px 22px;background:#f5f5f5;}
+.ej-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;opacity:.3;}
+.ej-card-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;padding:16px;background:#fff;border:1px solid var(--gray2);border-radius:12px;flex-wrap:wrap;}
+.ej-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.ej-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.ej-muscles-title{font-size:9px;color:var(--gray3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin:0 0 4px;}
+.ej-muscles-row{display:flex;flex-wrap:wrap;gap:3px;}
+.ej-muscle-pill{font-size:10px;padding:2px 8px;border-radius:12px;font-weight:500;}
+.ej-section{background:#fff;border:1px solid var(--gray2);border-radius:10px;padding:14px 16px;margin-bottom:10px;}
+.ej-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;}
+.ej-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.ej-step-num{min-width:22px;height:22px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.ej-step-text{font-size:13px;color:var(--black);margin:0;line-height:1.6;}
+.ej-tip{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;}
+.ej-tip-arrow{color:var(--red);font-size:14px;flex-shrink:0;line-height:1;margin-top:3px;}
+.ej-tip-text{font-size:13px;color:var(--black);margin:0;line-height:1.6;}
+.ej-err{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;}
+.ej-err-x{color:#a32d2d;font-size:13px;flex-shrink:0;line-height:1;margin-top:3px;}
+.ej-err-text{font-size:13px;color:var(--black);margin:0;line-height:1.6;}
+.ej-warmup-item{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid var(--gray2);}
+.ej-warmup-num{min-width:20px;height:20px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ej-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:10px;}
+.ej-spin{width:28px;height:28px;border:3px solid #e0e0e0;border-top:3px solid var(--red);border-radius:50%;animation:ejspin .8s linear infinite;}
+@keyframes ejspin{to{transform:rotate(360deg)}}
+.ej-anatomy{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ej-anatomy-views{display:flex;gap:10px;align-items:flex-end;}
+.ej-anatomy-label{font-size:8px;color:var(--gray3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:center;}
+.ej-anatomy-legend{display:flex;align-items:center;gap:4px;margin-top:2px;}
+.ej-anatomy-dot{width:8px;height:8px;border-radius:2px;background:var(--red);}
+/* mobile strip for exercises */
+.ej-mobile-strip{display:none;background:#141414;overflow-x:auto;padding:8px 12px;gap:6px;border-bottom:1px solid #2a2a2a;}
+@media(max-width:700px){
+  .ej-sidebar{display:none;}
+  .ej-mobile-strip{display:flex;}
+  .ej-list{width:100%;position:absolute;left:0;right:0;top:0;bottom:0;z-index:10;display:none;}
+  .ej-list.open{display:flex;}
+  .ej-wrap{position:relative;flex-direction:column;}
+  .ej-detail{padding:14px;}
+  .dash-nav{gap:1px;}
+  .dash-nav-btn{padding:6px 8px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-logo" id="btn-logo">Programa <span>HSB</span></div>
+    <ul class="nav-links">
+      <li><a id="btn-quiensoy">Quien soy</a></li>
+      <li><a id="btn-testimonios-nav">Testimonios</a></li>
+      <li><a id="btn-faq-nav">Preguntas frecuentes</a></li>
+    </ul>
+    <button class="nav-cta" id="btn-acceso">Acceso clientes</button>
+  </div>
+</nav>
+
+<div id="landing-page">
+  <section id="hero-section">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div><span class="hero-eyebrow-text">+300 casos de exito</span></div>
+        <h1 class="hero-title">Entrenador online<br>experto en<br><span class="red">perdida de grasa</span></h1>
+        <p class="hero-subtitle">Para hombres que quieren quitarse la barriga de una vez. Sin dietas imposibles. Sin horas en el gym. Con un sistema que funciona.</p>
+        <div class="hero-ctas">
+          <button class="btn-red" id="btn-wp-hero">Quiero empezar</button>
+          <button class="btn-outline" id="btn-sabemas">Saber mas</button>
+        </div>
+        <div class="hero-stats">
+          <div><div class="hero-stat-num">+<span>300</span></div><div class="hero-stat-label">Hombres transformados</div></div>
+          <div><div class="hero-stat-num"><span>10</span> años</div><div class="hero-stat-label">Experiencia real</div></div>
+          <div><div class="hero-stat-num"><span>6</span> meses</div><div class="hero-stat-label">Programa completo</div></div>
+        </div>
+      </div>
+      <div class="hero-img">
+        <img src="https://drive.google.com/uc?export=view&id=1gAEquPe-G-68vLHkgqFWGd4tyTrRrmht" alt="Diego Yugueros entrenador" loading="lazy"/>
+      </div>
+    </div>
+  </section>
+  <section id="sobre-section">
+    <div class="container">
+      <div class="sobre-grid">
+        <div>
+          <div class="tag">Quien soy</div>
+          <div class="sobre-name">Diego<br><span>Yugueros</span></div>
+          <div class="sobre-role">Entrenador online · HSB</div>
+          <div class="sobre-text">
+            <p>No trabajo con atletas ni con gente que tiene 3 horas al dia. Trabajo con hombres de entre 38 y 60 años que tienen trabajo, familia y una barriga que llevan años intentando quitarse.</p>
+            <p>He visto de todo: dietas que duran una semana, apps que nadie usa, nutricionistas que dan planes imposibles. <strong>Mi metodo es diferente porque parte de tu vida real, no de la vida que te gustaria tener.</strong></p>
+            <p>No vendo magia. Vendo un sistema que funciona cuando todo lo demas ha fallado.</p>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2rem;align-items:center;">
+          <div style="width:280px;height:280px;border-radius:50%;overflow:hidden;border:4px solid var(--black);">
+            <img src="https://drive.google.com/uc?export=view&id=1n_H2RgyBts6Si23IBQDPgzyMyjT0YnPi" alt="Diego Yugueros" style="width:100%;height:100%;object-fit:cover;object-position:center top;" loading="lazy"/>
+          </div>
+          <div class="sobre-nums">
+            <div class="sobre-num-item"><div class="sobre-num-big">+<span>300</span></div><div class="sobre-num-label">Casos de exito</div></div>
+            <div class="sobre-num-item"><div class="sobre-num-big"><span>10</span>+</div><div class="sobre-num-label">Anos de experiencia</div></div>
+            <div class="sobre-num-item"><div class="sobre-num-big"><span>6</span></div><div class="sobre-num-label">Meses de programa</div></div>
+            <div class="sobre-num-item"><div class="sobre-num-big"><span>0</span></div><div class="sobre-num-label">Dietas imposibles</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="para-quien-section">
+    <div class="container">
+      <div class="tag">Para quien es</div>
+      <h2 class="section-title">Este programa es para ti si te reconoces aqui</h2>
+      <div class="pq-grid">
+        <div class="pq-card"><div class="pq-icon">&#x23F0;</div><div class="pq-title">Poco tiempo</div><div class="pq-desc">El programa se adapta a tu realidad, no al reves.</div></div>
+        <div class="pq-card"><div class="pq-icon">&#x1F504;</div><div class="pq-title">Intentos fallidos</div><div class="pq-desc">El problema no eres tu, es el metodo que usabas.</div></div>
+        <div class="pq-card"><div class="pq-icon">&#x2708;</div><div class="pq-title">Viajas por trabajo</div><div class="pq-desc">El sistema HSB funciona en cualquier contexto.</div></div>
+        <div class="pq-card"><div class="pq-icon">&#x1F4AA;</div><div class="pq-title">38-60 anos</div><div class="pq-desc">Un enfoque disenado para tu metabolismo real.</div></div>
+        <div class="pq-card"><div class="pq-icon">&#x1F3AF;</div><div class="pq-title">Meta clara</div><div class="pq-desc">Quitarte la barriga, verte bien, recuperar energia.</div></div>
+        <div class="pq-card"><div class="pq-icon">&#x1F3E0;</div><div class="pq-title">Gym o casa</div><div class="pq-desc">El programa se adapta al material que tienes.</div></div>
+      </div>
+    </div>
+  </section>
+  <section id="metodo-section">
+    <div class="container">
+      <div class="tag">El metodo</div>
+      <h2 class="section-title">Como funciona HSB</h2>
+      <div class="metodo-steps">
+        <div class="metodo-step"><div class="metodo-num">01</div><div class="metodo-title">Diagnostico real</div><div class="metodo-desc">Analizamos tu situacion y objetivos. Sin plantillas genericas.</div></div>
+        <div class="metodo-step"><div class="metodo-num">02</div><div class="metodo-title">Plan personalizado</div><div class="metodo-desc">Entrenamiento y nutricion adaptados a tu vida real.</div></div>
+        <div class="metodo-step"><div class="metodo-num">03</div><div class="metodo-title">Acompanamiento</div><div class="metodo-desc">Revisiones y ajustes continuos. No desaparezco.</div></div>
+        <div class="metodo-step"><div class="metodo-num">04</div><div class="metodo-title">Cambio sostenible</div><div class="metodo-desc">El cambio que mantienes el resto de tu vida.</div></div>
+      </div>
+    </div>
+  </section>
+  <section id="testimonios-section">
+    <div class="container">
+      <div class="tag">Testimonios</div>
+      <h2 class="section-title">Lo que dicen los que ya lo han hecho</h2>
+      <div class="t-filters">
+        <button class="filter-btn active" id="tf-todos">Todos</button>
+        <button class="filter-btn" id="tf-perdida">Perdida de grasa</button>
+        <button class="filter-btn" id="tf-energia">Mas energia</button>
+        <button class="filter-btn" id="tf-habitos">Habitos</button>
+      </div>
+      <div class="t-grid" id="testimonios-grid"></div>
+    </div>
+  </section>
+  <section id="cta-section">
+    <div class="container" style="max-width:700px;text-align:center;">
+      <div class="tag">Empieza ya</div>
+      <h2 class="section-title">Listo para quitarte la barriga <span class="red">de una vez?</span></h2>
+      <p class="cta-sub">Sin excusas. Sin mas intentos fallidos. Con un sistema que ya ha funcionado con mas de 300 hombres como tu.</p>
+      <button class="btn-red" style="font-size:16px;padding:18px 44px;" id="btn-wp-cta">Hablar con Diego</button>
+    </div>
+  </section>
+  <footer>
+    <div style="margin-bottom:1rem;">
+      <a id="btn-faq-footer">Preguntas frecuentes</a>
+      <a id="btn-acceso-footer">Acceso clientes</a>
+    </div>
+    <div>2026 Diego Yugueros - HSB Hombres Sin Barriga</div>
+  </footer>
+</div>
+
+<div id="auth-page">
+  <div class="auth-box">
+    <div class="auth-logo">Programa <span>HSB</span></div>
+    <div class="auth-sub">Plataforma privada de clientes</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login">Entrar</button>
+      <button class="auth-tab" id="tab-register">Registrarme</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="login-form">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="login-email" placeholder="tu@email.com" autocomplete="email"/></div>
+      <div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" type="password" id="login-pass" placeholder="..." autocomplete="current-password"/></div>
+      <button class="btn-full" id="btn-login">Entrar a mi plataforma</button>
+    </div>
+    <div id="register-form" style="display:none;">
+      <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" type="text" id="reg-name" placeholder="Tu nombre"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="reg-email" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" type="password" id="reg-pass" placeholder="Minimo 6 caracteres"/></div>
+      <div class="form-group"><label class="form-label">Codigo de acceso</label><input class="form-input" type="text" id="reg-code" placeholder="Te lo da Diego"/></div>
+      <button class="btn-full" id="btn-register">Crear mi cuenta</button>
+    </div>
+    <div class="auth-switch" id="auth-switch">No tienes cuenta? <a id="btn-switch-tab" style="color:var(--red);font-weight:800;cursor:pointer;">Registrate</a></div>
+  </div>
+</div>
+
+<div id="dashboard-page">
+  <div class="dash-header">
+    <div class="dash-header-inner">
+      <div class="dash-logo">HSB <span>·</span> <span id="dash-username" style="font-weight:500;color:var(--gray3);font-size:14px;"></span></div>
+      <div class="dash-nav">
+        <button class="dash-nav-btn active" id="btn-dash-campus">Campus</button>
+        <button class="dash-nav-btn" id="btn-dash-macros">Mis macros</button>
+        <button class="dash-nav-btn" id="btn-dash-ejercicios" style="background:none;border:2px solid var(--red);color:var(--red);font-weight:800;">💪 Ejercicios</button>
+        <button class="dash-nav-btn" id="btn-dash-admin" style="display:none;">Admin</button>
+      </div>
+      <button class="dash-logout" id="btn-logout">Cerrar sesion</button>
+    </div>
+  </div>
+  <div class="dash-content">
+    <!-- CAMPUS -->
+    <div id="dash-campus" class="dash-section active">
+      <div class="dash-welcome"><h2 id="welcome-name">Bienvenido</h2><p>Aqui tienes todo el contenido del programa.</p></div>
+      <div class="campus-tabs">
+        <button class="campus-tab active" id="ctab-videos">Videos</button>
+        <button class="campus-tab" id="ctab-pdfs">Guias y PDFs</button>
+      </div>
+      <div id="cpanel-videos" class="campus-panel active">
+        <div class="video-filters" id="video-filters"></div>
+        <div class="videos-grid" id="videos-grid"></div>
+      </div>
+      <div id="cpanel-pdfs" class="campus-panel">
+        <div class="pdfs-grid" id="pdfs-grid"></div>
+      </div>
+    </div>
+    <!-- MACROS -->
+    <div id="dash-macros" class="dash-section">
+      <div class="dash-welcome"><h2>Mis macros</h2><p>Tu plan nutricional personalizado por Diego.</p></div>
+      <div id="macros-content"></div>
+    </div>
+    <!-- EJERCICIOS -->
+    <div id="dash-ejercicios" class="dash-section">
+      <div class="ej-mobile-strip" id="ej-mobile-strip"></div>
+      <div class="ej-wrap">
+        <div class="ej-sidebar" id="ej-sidebar"></div>
+        <div class="ej-list" id="ej-list">
+          <div class="ej-list-tabs">
+            <button class="ej-list-tab active" id="ej-tab-ejercicios" onclick="ejSetView('ejercicios')">Ejercicios</button>
+            <button class="ej-list-tab" id="ej-tab-warmup" onclick="ejSetView('warmup')">🔥 Calentamiento</button>
+          </div>
+          <div class="ej-list-search" id="ej-search-wrap">
+            <input type="text" id="ej-search" placeholder="Buscar..." oninput="ejRenderList()" style="width:100%;font-size:12px;padding:6px 9px;border-radius:6px;border:1px solid var(--gray2);font-family:inherit;outline:none;"/>
+            <div class="ej-list-levels" id="ej-levels"></div>
+            <div class="ej-list-count" id="ej-count"></div>
+          </div>
+          <div class="ej-list-items" id="ej-list-items"></div>
+        </div>
+        <div class="ej-detail" id="ej-detail">
+          <div class="ej-empty"><div style="font-size:36px;">🏋️</div><p style="font-size:13px;color:var(--gray3);text-align:center;">Selecciona un ejercicio</p></div>
+        </div>
+      </div>
+    </div>
+    <!-- ADMIN -->
+    <div id="dash-admin" class="dash-section">
+      <div class="dash-welcome"><h2>Panel de administracion</h2></div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="atab-videos">Videos</button>
+        <button class="admin-tab" id="atab-pdfs">PDFs</button>
+        <button class="admin-tab" id="atab-macros">Macros clientes</button>
+        <button class="admin-tab" id="atab-usuarios">Usuarios</button>
+      </div>
+      <div id="apanel-videos" class="admin-panel active">
+        <div class="admin-card">
+          <h3>Anadir video al campus</h3>
+          <div class="admin-two-col">
+            <div class="admin-form-group"><label class="admin-label">Titulo</label><input class="admin-input" type="text" id="v-title" placeholder="Nombre del video"/></div>
+            <div class="admin-form-group"><label class="admin-label">Categoria</label>
+              <select class="admin-select" id="v-cat">
+                <option value="Módulo 1 — Fundamentos">Módulo 1 — Fundamentos</option>
+                <option value="Módulo 2 — Nutrición">Módulo 2 — Nutrición</option>
+                <option value="Módulo 3 — Entrenamiento">Módulo 3 — Entrenamiento</option>
+                <option value="Módulo 4 — Mentalidad">Módulo 4 — Mentalidad</option>
+                <option value="Módulo 5 — Avanzado">Módulo 5 — Avanzado</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-two-col">
+            <div class="admin-form-group"><label class="admin-label">URL YouTube</label><input class="admin-input" type="text" id="v-url" placeholder="https://youtube.com/watch?v=..."/></div>
+            <div class="admin-form-group"><label class="admin-label">Duracion</label><input class="admin-input" type="text" id="v-dur" placeholder="ej: 15 min"/></div>
+          </div>
+          <button class="btn-admin" id="btn-add-video">Anadir video</button>
+          <div style="margin-top:2rem;"><h3 style="font-size:15px;font-weight:800;margin-bottom:1rem;">Videos actuales</h3><div id="video-admin-list"></div></div>
+        </div>
+      </div>
+      <div id="apanel-pdfs" class="admin-panel">
+        <div class="admin-card">
+          <h3>PDFs disponibles</h3>
+          <div id="pdf-admin-list"></div>
+        </div>
+      </div>
+      <div id="apanel-macros" class="admin-panel">
+        <div class="admin-card">
+          <h3>Asignar macros a un cliente</h3>
+          <div class="admin-form-group"><label class="admin-label">Cliente</label><select class="admin-select" id="macro-client-select"></select></div>
+          <div class="admin-two-col">
+            <div class="admin-form-group"><label class="admin-label">Calorias (kcal)</label><input class="admin-input" type="number" id="macro-cal" placeholder="ej: 1800"/></div>
+            <div class="admin-form-group"><label class="admin-label">Proteinas (g)</label><input class="admin-input" type="number" id="macro-pro" placeholder="ej: 150"/></div>
+          </div>
+          <div class="admin-two-col">
+            <div class="admin-form-group"><label class="admin-label">Carbohidratos (g)</label><input class="admin-input" type="number" id="macro-carb" placeholder="ej: 180"/></div>
+            <div class="admin-form-group"><label class="admin-label">Grasas (g)</label><input class="admin-input" type="number" id="macro-fat" placeholder="ej: 60"/></div>
+          </div>
+          <div class="admin-form-group"><label class="admin-label">Nota para el cliente</label><textarea class="admin-textarea" id="macro-note" placeholder="Consejo personalizado..."></textarea></div>
+          <button class="btn-admin" id="btn-save-macros">Guardar plan</button>
+        </div>
+        <div class="admin-card"><h3>Planes asignados</h3><div id="macros-admin-list"></div></div>
+      </div>
+      <div id="apanel-usuarios" class="admin-panel">
+        <div class="admin-card"><h3>Clientes registrados</h3><div id="user-list"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="faq-page">
+  <div class="faq-hero">
+    <h1 style="font-size:clamp(36px,5vw,64px);font-weight:900;letter-spacing:-2px;line-height:0.95;margin-bottom:1rem;">Preguntas frecuentes</h1>
+    <p style="color:var(--gray3);font-size:16px;">Todo lo que necesitas saber antes de empezar.</p>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item"><div class="faq-question">Funciona si tengo mas de 50 años?<span class="faq-arrow">+</span></div><div class="faq-answer">Si. La mayoria de mis clientes tienen entre 45 y 60 anos.</div></div>
+    <div class="faq-item"><div class="faq-question">No tengo tiempo. Trabajo mucho y tengo familia.<span class="faq-arrow">+</span></div><div class="faq-answer">30-45 minutos de entrenamiento, comidas normales ajustadas.</div></div>
+    <div class="faq-item"><div class="faq-question">Puedo seguirlo si viajo constantemente?<span class="faq-arrow">+</span></div><div class="faq-answer">Si. El entrenamiento tiene version de hotel y el plan contempla comer fuera.</div></div>
+    <div class="faq-item"><div class="faq-question">Voy a pasar hambre?<span class="faq-arrow">+</span></div><div class="faq-answer">No. Si pasas hambre, el plan esta mal hecho.</div></div>
+    <div class="faq-item"><div class="faq-question">Que pasa si tengo dudas?<span class="faq-arrow">+</span></div><div class="faq-answer">Tienes acceso directo a mi durante los 6 meses por WhatsApp y videollamada.</div></div>
+    <div style="text-align:center;margin-top:3rem;"><button class="btn-red" id="btn-wp-faq">Escribir a Diego</button></div>
+  </div>
+</div>
+
+<div class="video-modal" id="video-modal">
+  <div class="video-modal-inner">
+    <div class="video-modal-header">
+      <div class="video-modal-title" id="modal-title"></div>
+      <button class="video-modal-close" id="btn-close-modal">&#x2715;</button>
+    </div>
+    <div class="video-embed"><iframe id="modal-iframe" allowfullscreen></iframe></div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+var WA='https://wa.me/34640701157';
+var CODE='HSB2026';
+var SUPABASE_URL='https://fleboldwnnbjujktskgh.supabase.co';
+var SUPABASE_KEY='sb_publishable_M9d33CbyLJ8RVCnWHsCTSQ_L8qmjeht';
+var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var currentUser=null,allUsers=[],extraVideos=[];
+
+// ===================== EJERCICIOS DATA =====================
+var EJ_GROUPS=[
+  {id:'pecho',label:'Pecho'},{id:'espalda',label:'Espalda'},{id:'hombros',label:'Hombros'},
+  {id:'biceps',label:'Bíceps'},{id:'triceps',label:'Tríceps'},{id:'piernas',label:'Piernas'},
+  {id:'gluteos',label:'Glúteos'},{id:'core',label:'Core / Abs'}
+];
+var EJ_EQUIP=[{id:'libre',label:'Peso Libre'},{id:'maquina',label:'Máquinas'},{id:'polea',label:'Poleas'}];
+var EJ_LEVELS=['Todos','Principiante','Intermedio','Avanzado'];
+var EJ_LEVEL_PAT=['Principiante','Principiante','Principiante','Principiante','Principiante','Intermedio','Intermedio','Intermedio','Intermedio','Intermedio','Intermedio','Avanzado','Avanzado','Avanzado','Avanzado'];
+var EJ_VIEW_MAP={pecho:'front',espalda:'back',hombros:'both',biceps:'front',triceps:'back',piernas:'both',gluteos:'back',core:'front'};
+var EJ_WARMUPS={
+  pecho:['Rotaciones de hombro hacia atras x20','Band pull-apart x15','Push-up ligero x15','Aperturas con banda x15','Rotaciones de muneca x20'],
+  espalda:['Rotaciones de hombro x20','Cat-cow en cuadrupedia x15','Remo con banda ligera x15','Dislocaciones con palo x10','Extensiones de torso en suelo x12'],
+  hombros:['Circulos de brazo x20 cada sentido','Face pull con banda ligera x15','Elevaciones laterales con banda x15','Rotacion interna/externa con banda x12','Press overhead vacio x15'],
+  biceps:['Rotacion de munecas x20','Curl con banda ligera x15','Stretch de biceps en pared x30s','Supinacion de antebrazo x20','Curl de muneca vacio x15'],
+  triceps:['Rotaciones de codo x20','Extensiones overhead vacias x15','Dips asistidos x10','Stretch de triceps 30s cada lado','Press cerrado vacio x15'],
+  piernas:['Sentadilla sin peso x20','Zancadas sin peso x10 cada lado','Rotaciones de cadera x15','Peso muerto con banda x15','Puente de gluteos x20'],
+  gluteos:['Puente de gluteos x20','Abduccion tumbada con banda x15','Patadas traseras con banda x15','Sentadilla sumo sin peso x15','Rotaciones de cadera de pie x20'],
+  core:['Plancha 30s','Dead bug x10 cada lado','Rotacion de torso de pie x20','Crunch suave x20','Respiracion diafragmatica x10']
+};
+var EJ_DB={
+  pecho:{libre:['Press banca plano con barra','Press banca inclinado con barra','Press banca declinado con barra','Press banca plano con mancuernas','Press banca inclinado con mancuernas','Press banca declinado con mancuernas','Aperturas en banco plano','Aperturas en banco inclinado','Pullover con mancuerna','Press con kettlebell plano','Flexiones con lastre','Dips en paralelas','Press suizo con barra','Flyes con mancuernas en suelo','Push press con mancuernas'],maquina:['Press pecho en maquina Smith plano','Press pecho en maquina Smith inclinado','Peck deck / Mariposa','Crossover maquina sentado','Press de pecho Hammer Strength','Aperturas en maquina','Press convergente inclinado','Chest press neumatico','Maquina de pecho declinado','Press plano palancas','Press inclinado palancas','Aperturas invertidas en maquina','Cable crossover en maquina','Peck deck declinado','Press de pecho asistido'],polea:['Cruce de poleas alto','Cruce de poleas bajo','Cruce de poleas medio','Press de pecho en polea baja','Aperturas en polea alta','Aperturas en polea baja','Press inclinado en polea','Press declinado en polea','Pullover en polea alta','Press con cuerda en polea','Single arm crossover','Aperturas unilaterales','Press plano en polea','Cruce de poleas de pie','Fly declinado en polea']},
+  espalda:{libre:['Remo con barra pronado','Remo con barra supinado','Remo con mancuerna un brazo','Remo Pendlay','Peso muerto convencional','Peso muerto rumano','Peso muerto sumo','Dominadas agarre ancho','Dominadas agarre neutro','Dominadas supinas','Remo T-bar','Encogimientos con barra','Remo Yates','Pull-over con barra','Remo gironda'],maquina:['Jalon al pecho agarre ancho','Jalon al pecho agarre estrecho','Jalon neutro','Jalon tras nuca','Remo en maquina sentado','Remo Hammer Strength','Row asistido','Pulldown Hammer Strength','Maquina de remo unilateral','Remo sentado agarre supino','Hiperextensiones en banco','Maquina de espalda','Low row maquina','Mid row maquina','High row maquina'],polea:['Jalon en polea alta agarre ancho','Jalon en polea agarre neutro','Jalon unilateral','Remo en polea baja','Remo unilateral en polea','Remo con cuerda','Pull-over en polea alta','Remo inclinado en polea','Jalon tras nuca en polea','Face pull','Remo alto en polea','Jalon supino en polea','Remo en polea alta agarre abierto','Straight-arm pulldown','Remo a la cadera en polea']},
+  hombros:{libre:['Press militar con barra de pie','Press militar sentado','Press Arnold','Elevaciones laterales con mancuernas','Elevaciones frontales con barra','Elevaciones frontales alternas','Pajaro con mancuernas','Remo al cuello con barra','Press trasnuca','Face pull con banda','Encogimientos con mancuernas','Press Z-press','Elevaciones laterales tumbado','Curl de hombro','Pajaro inclinado'],maquina:['Press de hombros en Smith','Press de hombros Hammer Strength','Elevaciones laterales en maquina','Elevaciones frontales en maquina','Pajaro en maquina peck deck inverso','Remo al cuello en maquina','Press de hombros asistido','Maquina de elevaciones laterales unilateral','Shoulder press neumatico','Elevaciones laterales sentado en maquina','Press mancuernas en maquina guiada','Aperturas posteriores en maquina','Press vertical de hombros','Maquina de remo alto','Deltoides posterior maquina'],polea:['Elevaciones laterales en polea baja','Elevaciones frontales en polea','Pajaro en polea','Remo al cuello en polea','Press de hombros en polea','Face pull en polea','Elevaciones laterales cruzadas','Upright row en polea','Elevacion lateral unilateral','Rotacion externa en polea','Rotacion interna en polea','Elevaciones laterales con cuerda','Press overhead en polea','Elevaciones 90 en polea','Deltoides posterior en polea']},
+  biceps:{libre:['Curl con barra recta','Curl con barra Z','Curl alterno con mancuernas','Curl martillo','Curl concentrado','Curl predicador con barra','Curl predicador con mancuerna','Curl inverso con barra','Curl 21s','Curl con barra supino ancho','Curl spider','Curl Zottman','Curl inclinado con mancuernas','Curl de pie con barra EZ','Curl cross body'],maquina:['Curl en maquina predicador','Curl en maquina sentado','Curl concentrado en maquina','Curl asistido en maquina','Maquina de biceps unilateral','Curl invertido en maquina','Maquina de predicador bilateral','Curl isometrico en maquina','Cable curl en maquina baja','Curl Hammer en maquina','Maquina de curl alternado','Curl neutro en maquina','Curl en banco predicador maquina','Maquina biceps neumatica','Curl de biceps guiado'],polea:['Curl en polea baja','Curl en polea alta','Curl unilateral en polea','Curl Hammer en polea','Curl predicador en polea','Curl invertido en polea','Curl con cuerda en polea','Curl de pie en polea alta','Curl inclinado en polea','Curl concentrado en polea','Curl supino en polea','Curl spider en polea','Curl bilateral en polea alta','Curl neutro en polea baja','Curl arabe en polea']},
+  triceps:{libre:['Press frances con barra','Press frances con mancuernas','Extension sobre cabeza con barra','Extension con mancuerna sobre cabeza','Fondos en paralelas','Rompecraneos con barra EZ','Press cerrado con barra','Patadas de triceps','Extension unilateral sobre cabeza','Press cerrado mancuernas','Dips en banco','Rompecraneos inclinado','Extension de triceps en suelo','Press cerrado en banco inclinado','Overhead extension dos mancuernas'],maquina:['Extension de triceps en maquina','Press de triceps Hammer Strength','Maquina de fondos asistidos','Pushdown en maquina','Extension sobre cabeza en maquina','Maquina de triceps unilateral','Press cerrado en Smith','Extension invertida en maquina','Maquina neumatica de triceps','Triceps en maquina de palancas','Extension sentado en maquina','Fondos guiados en maquina','Maquina de extension bilateral','Triceps asistido en maquina','Press cerrado guiado'],polea:['Pushdown en polea con barra','Pushdown en polea con cuerda','Pushdown inverso en polea','Extension sobre cabeza en polea','Extension unilateral en polea','Kickback en polea','Pushdown agarre neutro','Extension en polea alta bilateral','Triceps en polea baja','Extension de triceps invertida en polea','Pushdown con mango recto','Pushdown con V-bar','Extension en cruz en polea','Overhead triceps en polea baja','Triceps unilateral polea alta']},
+  piernas:{libre:['Sentadilla con barra trasera','Sentadilla con barra delantera','Peso muerto convencional','Peso muerto rumano','Zancadas con barra','Zancadas con mancuernas','Step-up con mancuernas','Sentadilla bulgara','Hack squat con barra','Sentadilla goblet con kettlebell','Good morning','Sentadilla pistol','Hip thrust con barra','Sentadilla sumo con mancuerna','Peso muerto sumo'],maquina:['Prensa de piernas 45','Prensa horizontal','Extension de cuadriceps','Curl femoral tumbado','Curl femoral sentado','Sentadilla en Smith','Hack squat en maquina','Abductor en maquina','Aductor en maquina','Prensa una pierna','Sentadilla Smith frontal','Leg press vertical','Glute drive maquina','Hip thrust maquina','Extension de cuadriceps unilateral'],polea:['Curl femoral en polea baja','Extension de pierna en polea','Patada trasera en polea','Abduccion en polea','Aduccion en polea','Zancada en polea','Hip thrust en polea','Sentadilla con polea','Curl isquiotibial en polea','Patada lateral en polea','Pull through en polea','Step back en polea','Extension unilateral en polea','Curl de pierna de pie en polea','RDL en polea']},
+  gluteos:{libre:['Hip thrust con barra','Sentadilla bulgara','Peso muerto rumano','Zancadas largas con barra','Step-up con lastre','Sentadilla sumo profunda','Good morning','Puente de gluteos con barra','Zancadas laterales','Hip hinge con kettlebell','Sentadilla goblet profunda','Sentadilla sumo con mancuerna','Peso muerto sumo con mancuerna','Zancadas inversas con barra','Donkey kicks con peso'],maquina:['Hip thrust en maquina','Glute drive','Prensa 45 con pie alto','Extension de cadera en maquina','Abductor en maquina','Curl femoral tumbado foco gluteo','Sentadilla Smith paso ancho','Prensa sumo en maquina','Reverse hyperextension','Maquina de patada trasera','Abductor de pie','Glute kickback maquina','Prensa unilateral pie alto','Maquina de aduccion','Hip extension en banco romano'],polea:['Patada trasera en polea','Patada lateral en polea','Pull through en polea','Hip thrust en polea','Abduccion en polea','Aduccion en polea','Donkey kick en polea','Extension de cadera de pie en polea','Step back en polea','Patada trasera rodilla doblada','Hip extension inclinado en polea','Patada diagonal en polea','Reverse lunge en polea','Glute kickback en polea','RDL en polea']},
+  core:{libre:['Crunch abdominal','Crunch inverso','Crunch bicicleta','Plancha frontal','Plancha lateral','Russian twist con peso','Elevacion de piernas colgado','Rodillas al pecho colgado','Ab wheel rollout','Sit-up completo','Dead bug','Pallof press con banda','Windmill con kettlebell','Turkish get-up','Dragon flag'],maquina:['Crunch en maquina','Crunch inverso en maquina','Rotacion en maquina de cables','Crunch declinado en banco','Hiperextensiones en banco romano','Crunch lateral en maquina','Extension de espalda en maquina','Maquina de oblicuos','Crunch asistido','Rotacion de torso en maquina','Extension lumbar','Maquina de abdominales sentado','Ab coaster maquina','Crunch con palancas','Maquina de core rotacional'],polea:['Crunch en polea alta','Crunch lateral en polea','Rotacion de torso en polea','Pallof press en polea','Crunch invertido en polea','Woodchop en polea alta','Woodchop en polea baja','Woodchop horizontal','Plancha con tiron de polea','Stir the pot en polea','Crunch unilateral en polea','Rotacion anti-lateral en polea','Crunch de pie en polea','Elevacion de rodillas en polea','Rollout en polea']}
+};
+
+// ===================== EJERCICIOS STATE =====================
+var ejGroup='pecho',ejEquip='libre',ejLevel='Todos',ejView='ejercicios',ejSelEx=null,ejLoading=false;
+
+function ejInit(){
+  ejRenderSidebar();
+  ejRenderMobileStrip();
+  ejRenderList();
+}
+
+function ejRenderSidebar(){
+  var sb=document.getElementById('ej-sidebar');
+  var h='<div class="ej-sidebar-label">Grupo muscular</div>';
+  EJ_GROUPS.forEach(function(g){
+    h+='<button class="ej-sidebar-btn'+(ejGroup===g.id?' active':'')+'" onclick="ejSetGroup(\''+g.id+'\')">'+g.label+'</button>';
+  });
+  h+='<div class="ej-sidebar-div"/>';
+  h+='<div class="ej-sidebar-label">Equipamiento</div>';
+  EJ_EQUIP.forEach(function(e){
+    h+='<button class="ej-sidebar-equip'+(ejEquip===e.id?' active':'')+'" onclick="ejSetEquip(\''+e.id+'\')">'+e.label+'</button>';
+  });
+  h+='<div class="ej-sidebar-div"/>';
+  h+='<button class="ej-sidebar-warmup'+(ejView==='warmup'?' active':'')+'" onclick="ejSetView(\'warmup\')">🔥 Calentamiento</button>';
+  sb.innerHTML=h;
+}
+
+function ejRenderMobileStrip(){
+  var strip=document.getElementById('ej-mobile-strip');
+  var h='';
+  EJ_GROUPS.forEach(function(g){
+    h+='<button onclick="ejSetGroup(\''+g.id+'\')" style="background:'+(ejGroup===g.id?'var(--red)':'#222')+';color:'+(ejGroup===g.id?'#fff':'#aaa')+';border:none;border-radius:20px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;font-family:inherit;">'+g.label+'</button>';
+  });
+  h+='<div style="width:1px;background:#333;margin:0 4px;flex-shrink:0;"></div>';
+  EJ_EQUIP.forEach(function(e){
+    h+='<button onclick="ejSetEquip(\''+e.id+'\')" style="background:transparent;color:'+(ejEquip===e.id?'var(--red)':'#888')+';border:1px solid '+(ejEquip===e.id?'var(--red)':'#333')+';border-radius:20px;padding:5px 12px;cursor:pointer;font-size:11px;white-space:nowrap;flex-shrink:0;font-family:inherit;">'+(e.label)+'</button>';
+  });
+  strip.innerHTML=h;
+}
+
+function ejRenderList(){
+  var searchEl=document.getElementById('ej-search');
+  var search=searchEl?searchEl.value.toLowerCase():'';
+  var exercises=(EJ_DB[ejGroup]&&EJ_DB[ejGroup][ejEquip])||[];
+  var withLevel=exercises.map(function(e,i){return{name:e,level:EJ_LEVEL_PAT[i]||'Intermedio'};});
+  var filtered=withLevel.filter(function(e){
+    return(ejLevel==='Todos'||e.level===ejLevel)&&e.name.toLowerCase().indexOf(search)!==-1;
+  });
+  // levels
+  var lvlColors={Principiante:'#3B6D11',Intermedio:'#BA7517',Avanzado:'#A32D2D'};
+  var lvlBg={Principiante:'#3B6D1118',Intermedio:'#BA751718',Avanzado:'#A32D2D18'};
+  var lh='';
+  EJ_LEVELS.forEach(function(l){
+    var active=ejLevel===l;
+    var bg=active?(l==='Todos'?'#333':lvlBg[l]):'#f0f0f0';
+    var color=active?(l==='Todos'?'#fff':lvlColors[l]):'#888';
+    var border=active&&l!=='Todos'?'1px solid '+lvlColors[l]+'44':'1px solid transparent';
+    lh+='<button onclick="ejSetLevel(\''+l+'\')" style="font-size:10px;padding:3px 7px;border-radius:20px;border:'+border+';cursor:pointer;font-family:inherit;font-weight:600;background:'+bg+';color:'+color+';">'+(l==='Todos'?'Todos':l.slice(0,5)+'.')+'</button>';
+  });
+  document.getElementById('ej-levels').innerHTML=lh;
+  document.getElementById('ej-count').textContent=filtered.length+' ejercicios';
+  var h='';
+  filtered.forEach(function(ex){
+    var active=ejSelEx===ex.name;
+    var lc=lvlColors[ex.level];var lb=lvlBg[ex.level];
+    h+='<button class="ej-list-item'+(active?' active':'')+'" onclick="ejLoadExercise(\''+ex.name.replace(/'/g,'')+'\',\''+ex.level+'\')">';
+    h+='<span>'+ex.name+'</span>';
+    h+='<span class="lvl-badge" style="background:'+(active?'rgba(255,255,255,0.2)':lb)+';color:'+(active?'#fff':lc)+';">'+ex.level.slice(0,3).toUpperCase()+'</span>';
+    h+='</button>';
+  });
+  document.getElementById('ej-list-items').innerHTML=h||'<div style="padding:2rem;text-align:center;font-size:13px;color:var(--gray3);">Sin resultados</div>';
+}
+
+function ejRenderWarmup(){
+  document.getElementById('ej-search-wrap').style.display='none';
+  var warmups=EJ_WARMUPS[ejGroup]||[];
+  var groupLabel=EJ_GROUPS.find(function(g){return g.id===ejGroup;}).label;
+  var h='<div style="padding:12px;border-bottom:1px solid var(--gray2);"><p style="font-size:11px;color:var(--gray3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Calentamiento — '+groupLabel+'</p>';
+  warmups.forEach(function(w,i){
+    h+='<div class="ej-warmup-item"><span class="ej-warmup-num">'+(i+1)+'</span><p style="font-size:12.5px;color:var(--black);margin:0;line-height:1.5;">'+w+'</p></div>';
+  });
+  h+='<p style="font-size:11px;color:var(--gray3);margin-top:6px;line-height:1.5;">Realiza este calentamiento antes de entrenar '+groupLabel.toLowerCase()+' para activar la zona y prevenir lesiones.</p></div>';
+  document.getElementById('ej-list-items').innerHTML=h;
+}
+
+function ejSetGroup(g){
+  ejGroup=g;ejSelEx=null;
+  ejRenderSidebar();ejRenderMobileStrip();
+  if(ejView==='ejercicios'){document.getElementById('ej-search-wrap').style.display='block';ejRenderList();}
+  else ejRenderWarmup();
+  ejShowDetail(null);
+}
+
+function ejSetEquip(e){
+  ejEquip=e;ejSelEx=null;
+  ejRenderSidebar();ejRenderMobileStrip();
+  if(ejView==='ejercicios'){ejRenderList();}
+  ejShowDetail(null);
+}
+
+function ejSetLevel(l){ejLevel=l;ejRenderList();}
+
+function ejSetView(v){
+  ejView=v;
+  document.getElementById('ej-tab-ejercicios').classList.toggle('active',v==='ejercicios');
+  document.getElementById('ej-tab-warmup').classList.toggle('active',v==='warmup');
+  ejRenderSidebar();
+  if(v==='ejercicios'){document.getElementById('ej-search-wrap').style.display='block';ejRenderList();}
+  else{document.getElementById('ej-search-wrap').style.display='none';ejRenderWarmup();}
+}
+
+function ejShowDetail(html){
+  document.getElementById('ej-detail').innerHTML=html||'<div class="ej-empty"><div style="font-size:36px;">🏋️</div><p style="font-size:13px;color:var(--gray3);text-align:center;">Selecciona un ejercicio</p></div>';
+}
+
+async function ejLoadExercise(name,level){
+  ejSelEx=name;ejRenderList();
+  ejShowDetail('<div class="ej-spinner"><div class="ej-spin"></div><span style="font-size:13px;color:var(--gray3);">Cargando...</span></div>');
+  try{
+    var eL={libre:'peso libre',maquina:'maquina',polea:'polea'};
+    var gL={pecho:'pecho',espalda:'espalda',hombros:'hombros',biceps:'biceps',triceps:'triceps',piernas:'piernas',gluteos:'gluteos',core:'core/abdominales'};
+    var prompt='Eres un entrenador personal experto. Dame informacion del ejercicio "'+name+'" (grupo: '+gL[ejGroup]+', equipo: '+eL[ejEquip]+', nivel: '+level+').\nResponde SOLO con JSON valido sin markdown ni backticks:\n{"nombre":"'+name+'","nivel":"'+level+'","musculos_principales":["m1"],"musculos_secundarios":["m1"],"tecnica":["Paso 1","Paso 2","Paso 3","Paso 4","Paso 5"],"consejos":["C1","C2","C3"],"errores_comunes":["E1","E2"]}';
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    var data=await res.json();
+    var text=(data.content||[]).map(function(i){return i.text||'';}).join('');
+    var d=JSON.parse(text.replace(/```json|```/g,'').trim());
+    ejShowDetail(ejBuildDetail(d));
+  }catch(e){
+    ejShowDetail('<div style="text-align:center;padding:2rem;color:var(--gray3);"><p style="margin-bottom:12px;">Error al cargar. Intentalo de nuevo.</p><button onclick="ejLoadExercise(\''+name+'\',\''+level+'\')" style="background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">Reintentar</button></div>');
+  }
+}
+
+function ejAnatomy(group){
+  var view=EJ_VIEW_MAP[group];
+  var R='#d4001a',S='#c8a070',SD='#a07848',SL='#e0c090',LN='#8a6050';
+  function af(z){var m={pecho:['pec'],espalda:[],hombros:['df','dl'],biceps:['bic'],triceps:[],piernas:['quad','calf'],gluteos:[],core:['abs','obl']};return(m[group]||[]).indexOf(z)!==-1;}
+  function ab(z){var m={pecho:[],espalda:['trap','lat','lb'],hombros:['dlb','dp'],biceps:[],triceps:['tri'],piernas:['ham','cb','gb'],gluteos:['gb','ham'],core:['lb']};return(m[group]||[]).indexOf(z)!==-1;}
+  function ff(z){return af(z)?R:S;}function fs(z){return af(z)?'#a32d2d':LN;}
+  function bf(z){return ab(z)?R:S;}function bs(z){return ab(z)?'#a32d2d':LN;}
+  var front='<svg viewBox="0 0 140 340" width="68" height="165"><defs><radialGradient id="hgfp" cx="50%" cy="40%"><stop offset="0%" stop-color="'+SL+'"/><stop offset="100%" stop-color="'+S+'"/></radialGradient></defs><ellipse cx="70" cy="20" rx="15" ry="18" fill="url(#hgfp)" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="63" cy="18" rx="2.5" ry="2" fill="#5a3828" opacity="0.7"/><ellipse cx="77" cy="18" rx="2.5" ry="2" fill="#5a3828" opacity="0.7"/><path d="M65,26 Q70,30 75,26" fill="none" stroke="'+LN+'" stroke-width="0.9" stroke-linecap="round"/><path d="M63,36 Q67,40 70,40 Q73,40 77,36 L76,46 Q73,48 70,48 Q67,48 64,46Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><path d="M64,46 Q56,50 48,56 L52,60 Q60,54 70,52 Q80,54 88,60 L92,56 Q84,50 76,46Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="42" cy="66" rx="11" ry="10" transform="rotate(-10,42,66)" fill="'+ff('df')+'" stroke="'+fs('df')+'" stroke-width="0.9"/><ellipse cx="98" cy="66" rx="11" ry="10" transform="rotate(10,98,66)" fill="'+ff('df')+'" stroke="'+fs('df')+'" stroke-width="0.9"/><ellipse cx="40" cy="72" rx="9" ry="8" fill="'+ff('dl')+'" stroke="'+fs('dl')+'" stroke-width="0.8" opacity="0.8"/><ellipse cx="100" cy="72" rx="9" ry="8" fill="'+ff('dl')+'" stroke="'+fs('dl')+'" stroke-width="0.8" opacity="0.8"/><path d="M52,58 Q61,55 69,59 L69,88 Q61,92 52,86 Q47,78 52,58Z" fill="'+ff('pec')+'" stroke="'+fs('pec')+'" stroke-width="1"/><path d="M71,59 Q79,55 88,58 Q93,78 88,86 Q79,92 71,88 L71,59Z" fill="'+ff('pec')+'" stroke="'+fs('pec')+'" stroke-width="1"/><line x1="70" y1="57" x2="70" y2="90" stroke="'+fs('pec')+'" stroke-width="0.5"/><path d="M57,90 Q63,88 69,90 L69,154 Q63,156 57,154 Q53,140 57,90Z" fill="'+ff('abs')+'" stroke="'+fs('abs')+'" stroke-width="0.8"/><path d="M71,90 Q77,88 83,90 Q87,140 83,154 L71,154 L71,90Z" fill="'+ff('abs')+'" stroke="'+fs('abs')+'" stroke-width="0.8"/><line x1="57" y1="108" x2="83" y2="108" stroke="'+fs('abs')+'" stroke-width="0.6"/><line x1="57" y1="124" x2="83" y2="124" stroke="'+fs('abs')+'" stroke-width="0.6"/><line x1="57" y1="140" x2="83" y2="140" stroke="'+fs('abs')+'" stroke-width="0.6"/><line x1="70" y1="90" x2="70" y2="154" stroke="'+fs('abs')+'" stroke-width="0.6"/><path d="M53,94 Q47,112 49,148 Q54,144 58,132 Q56,114 53,94Z" fill="'+ff('obl')+'" stroke="'+fs('obl')+'" stroke-width="0.8"/><path d="M87,94 Q93,112 91,148 Q86,144 82,132 Q84,114 87,94Z" fill="'+ff('obl')+'" stroke="'+fs('obl')+'" stroke-width="0.8"/><path d="M30,68 Q23,76 23,98 Q26,107 33,107 Q40,107 43,98 Q43,76 36,68Z" fill="'+ff('bic')+'" stroke="'+fs('bic')+'" stroke-width="0.9"/><path d="M97,68 Q104,76 117,98 Q114,107 107,107 Q100,107 97,98 Q97,76 104,68Z" fill="'+ff('bic')+'" stroke="'+fs('bic')+'" stroke-width="0.9"/><path d="M25,108 Q20,118 22,140 Q26,147 33,147 Q40,147 44,140 Q46,118 41,108Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><path d="M99,108 Q103,118 118,140 Q114,147 107,147 Q100,147 96,140 Q94,118 99,108Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="31" cy="154" rx="9" ry="10" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="109" cy="154" rx="9" ry="10" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><path d="M53,154 Q62,150 70,152 Q78,150 87,154 Q89,166 70,168 Q51,166 53,154Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.9"/><path d="M53,166 Q44,180 44,216 Q48,234 57,238 Q65,240 68,232 Q73,216 71,188 Q69,172 62,166Z" fill="'+ff('quad')+'" stroke="'+fs('quad')+'" stroke-width="0.9"/><path d="M87,166 Q96,180 96,216 Q92,234 83,238 Q75,240 72,232 Q67,216 69,188 Q71,172 78,166Z" fill="'+ff('quad')+'" stroke="'+fs('quad')+'" stroke-width="0.9"/><ellipse cx="58" cy="242" rx="11" ry="8" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="82" cy="242" rx="11" ry="8" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><path d="M50,252 Q44,265 46,292 Q50,306 58,308 Q66,306 68,292 Q70,265 66,252Z" fill="'+ff('calf')+'" stroke="'+fs('calf')+'" stroke-width="0.9"/><path d="M74,252 Q80,265 94,292 Q90,306 82,308 Q74,306 72,292 Q70,265 74,252Z" fill="'+ff('calf')+'" stroke="'+fs('calf')+'" stroke-width="0.9"/><rect x="50" y="308" width="16" height="7" rx="3" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><rect x="74" y="308" width="16" height="7" rx="3" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="59" cy="320" rx="13" ry="6" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="81" cy="320" rx="13" ry="6" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/></svg>';
+  var back='<svg viewBox="0 0 140 340" width="68" height="165"><defs><radialGradient id="hgbp" cx="50%" cy="40%"><stop offset="0%" stop-color="'+SL+'"/><stop offset="100%" stop-color="'+S+'"/></radialGradient></defs><ellipse cx="70" cy="20" rx="15" ry="18" fill="url(#hgbp)" stroke="'+LN+'" stroke-width="0.8"/><path d="M63,36 Q67,40 70,40 Q73,40 77,36 L76,46 Q73,48 70,48 Q67,48 64,46Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><path d="M64,46 Q56,48 48,56 L52,62 Q62,56 70,54 Q78,56 88,62 L92,56 Q84,48 76,46 Q73,52 70,52 Q67,52 64,46Z" fill="'+bf('trap')+'" stroke="'+bs('trap')+'" stroke-width="1"/><path d="M52,62 Q60,72 70,74 Q80,72 88,62 Q80,68 70,70 Q60,68 52,62Z" fill="'+bf('trap')+'" stroke="'+bs('trap')+'" stroke-width="0.8"/><ellipse cx="41" cy="68" rx="11" ry="10" transform="rotate(10,41,68)" fill="'+bf('dlb')+'" stroke="'+bs('dlb')+'" stroke-width="0.9"/><ellipse cx="99" cy="68" rx="11" ry="10" transform="rotate(-10,99,68)" fill="'+bf('dlb')+'" stroke="'+bs('dlb')+'" stroke-width="0.9"/><ellipse cx="40" cy="74" rx="8" ry="7" fill="'+bf('dp')+'" stroke="'+bs('dp')+'" stroke-width="0.8"/><ellipse cx="100" cy="74" rx="8" ry="7" fill="'+bf('dp')+'" stroke="'+bs('dp')+'" stroke-width="0.8"/><path d="M49,64 Q40,82 42,118 Q50,110 56,100 Q54,82 52,64Z" fill="'+bf('lat')+'" stroke="'+bs('lat')+'" stroke-width="1"/><path d="M91,64 Q100,82 98,118 Q90,110 84,100 Q86,82 88,64Z" fill="'+bf('lat')+'" stroke="'+bs('lat')+'" stroke-width="1"/><path d="M56,64 Q64,62 70,64 Q76,62 84,64 Q80,88 70,92 Q60,88 56,64Z" fill="'+bf('trap')+'" stroke="'+bs('trap')+'" stroke-width="0.8" opacity="0.7"/><rect x="60" y="118" width="9" height="38" rx="4" fill="'+bf('lb')+'" stroke="'+bs('lb')+'" stroke-width="0.8"/><rect x="71" y="118" width="9" height="38" rx="4" fill="'+bf('lb')+'" stroke="'+bs('lb')+'" stroke-width="0.8"/><path d="M30,68 Q22,78 22,106 Q26,114 33,113 Q40,112 42,104 Q43,80 36,68Z" fill="'+bf('tri')+'" stroke="'+bs('tri')+'" stroke-width="0.9"/><path d="M98,68 Q108,78 118,106 Q114,114 107,113 Q100,112 98,104 Q97,80 104,68Z" fill="'+bf('tri')+'" stroke="'+bs('tri')+'" stroke-width="0.9"/><path d="M24,114 Q19,124 21,146 Q25,153 33,153 Q41,153 45,146 Q47,124 42,114Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><path d="M98,114 Q102,124 119,146 Q115,153 107,153 Q99,153 95,146 Q93,124 98,114Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="31" cy="160" rx="9" ry="10" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="109" cy="160" rx="9" ry="10" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><path d="M54,156 Q62,152 70,154 Q78,152 86,156 Q88,168 70,170 Q52,168 54,156Z" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.9"/><path d="M54,168 Q46,176 46,196 Q50,210 62,214 Q70,216 70,210 L70,170Z" fill="'+bf('gb')+'" stroke="'+bs('gb')+'" stroke-width="1"/><path d="M86,168 Q94,176 94,196 Q90,210 78,214 Q70,216 70,210 L70,170Z" fill="'+bf('gb')+'" stroke="'+bs('gb')+'" stroke-width="1"/><line x1="70" y1="170" x2="70" y2="212" stroke="'+bs('gb')+'" stroke-width="0.6"/><path d="M46,208 Q40,222 42,250 Q46,264 56,266 Q64,265 66,256 Q68,240 68,216 Q62,212 54,210Z" fill="'+bf('ham')+'" stroke="'+bs('ham')+'" stroke-width="0.9"/><path d="M94,208 Q100,222 98,250 Q94,264 84,266 Q76,265 74,256 Q72,240 72,216 Q78,212 86,210Z" fill="'+bf('ham')+'" stroke="'+bs('ham')+'" stroke-width="0.9"/><ellipse cx="57" cy="270" rx="11" ry="8" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><ellipse cx="83" cy="270" rx="11" ry="8" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.8"/><path d="M48,278 Q42,292 44,316 Q48,328 57,330 Q66,328 68,316 Q70,292 66,278Z" fill="'+bf('cb')+'" stroke="'+bs('cb')+'" stroke-width="0.9"/><path d="M72,278 Q78,292 96,316 Q92,328 83,330 Q74,328 72,316 Q70,292 72,278Z" fill="'+bf('cb')+'" stroke="'+bs('cb')+'" stroke-width="0.9"/><rect x="49" y="330" width="17" height="7" rx="3" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><rect x="74" y="330" width="17" height="7" rx="3" fill="'+SD+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="58" cy="342" rx="13" ry="5.5" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/><ellipse cx="82" cy="342" rx="13" ry="5.5" fill="'+S+'" stroke="'+LN+'" stroke-width="0.7"/></svg>';
+  var html='<div class="ej-anatomy">';
+  html+='<div class="ej-anatomy-views">';
+  if(view==='front'||view==='both') html+='<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'+front+(view==='both'?'<span class="ej-anatomy-label">Frontal</span>':'')+'</div>';
+  if(view==='back'||view==='both') html+='<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'+back+(view==='both'?'<span class="ej-anatomy-label">Dorsal</span>':'')+'</div>';
+  html+='</div>';
+  if(view!=='both') html+='<span class="ej-anatomy-label">Vista '+(view==='front'?'frontal':'dorsal')+'</span>';
+  html+='<div class="ej-anatomy-legend"><div class="ej-anatomy-dot"></div><span style="font-size:9px;color:var(--gray3);">Zona activa</span></div>';
+  html+='</div>';
+  return html;
+}
+
+function ejBuildDetail(d){
+  var lvlC={Principiante:'#3B6D11',Intermedio:'#BA7517',Avanzado:'#A32D2D'};
+  var lvlBg={Principiante:'#3B6D1118',Intermedio:'#BA751718',Avanzado:'#A32D2D18'};
+  var groupLabel=EJ_GROUPS.find(function(g){return g.id===ejGroup;}).label;
+  var equipLabel=EJ_EQUIP.find(function(e){return e.id===ejEquip;}).label;
+  var h='<div style="max-width:620px;">';
+  // header card
+  h+='<div class="ej-card-header">';
+  h+=ejAnatomy(ejGroup);
+  h+='<div style="flex:1;min-width:160px;">';
+  h+='<h1 style="font-size:17px;font-weight:800;color:var(--black);margin:0 0 8px;line-height:1.2;">'+d.nombre+'</h1>';
+  h+='<div class="ej-badges">';
+  h+='<span class="ej-badge" style="background:var(--red);color:#fff;">'+groupLabel+'</span>';
+  h+='<span class="ej-badge" style="background:#f0f0f0;color:#555;border:1px solid var(--gray2);">'+equipLabel+'</span>';
+  if(d.nivel) h+='<span class="ej-badge" style="background:'+lvlBg[d.nivel]+';color:'+lvlC[d.nivel]+';border:1px solid '+lvlC[d.nivel]+'44;">'+d.nivel+'</span>';
+  h+='</div>';
+  if(d.musculos_principales&&d.musculos_principales.length){
+    h+='<div style="margin-bottom:6px;"><p class="ej-muscles-title">Principales</p><div class="ej-muscles-row">';
+    d.musculos_principales.forEach(function(m){h+='<span class="ej-muscle-pill" style="background:var(--red);color:#fff;">'+m+'</span>';});
+    h+='</div></div>';
+  }
+  if(d.musculos_secundarios&&d.musculos_secundarios.length){
+    h+='<div><p class="ej-muscles-title">Secundarios</p><div class="ej-muscles-row">';
+    d.musculos_secundarios.forEach(function(m){h+='<span class="ej-muscle-pill" style="background:#f0f0f0;color:#555;border:1px solid var(--gray2);">'+m+'</span>';});
+    h+='</div></div>';
+  }
+  h+='</div></div>';
+  // tecnica
+  h+='<div class="ej-section">';
+  h+='<h2 class="ej-section-title" style="color:var(--red);">Tecnica de ejecucion</h2>';
+  (d.tecnica||[]).forEach(function(s,i){h+='<div class="ej-step"><span class="ej-step-num">'+(i+1)+'</span><p class="ej-step-text">'+s+'</p></div>';});
+  h+='</div>';
+  // consejos
+  h+='<div class="ej-section">';
+  h+='<h2 class="ej-section-title" style="color:var(--red);">Consejos clave</h2>';
+  (d.consejos||[]).forEach(function(t){h+='<div class="ej-tip"><span class="ej-tip-arrow">→</span><p class="ej-tip-text">'+t+'</p></div>';});
+  h+='</div>';
+  // errores
+  if(d.errores_comunes&&d.errores_comunes.length){
+    h+='<div class="ej-section" style="background:#fff8f8;border-color:#ffdddd;">';
+    h+='<h2 class="ej-section-title" style="color:#a32d2d;">Errores comunes</h2>';
+    d.errores_comunes.forEach(function(e){h+='<div class="ej-err"><span class="ej-err-x">✕</span><p class="ej-err-text">'+e+'</p></div>';});
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+// ===================== PLATAFORMA ORIGINAL =====================
+var VIDEOS_FIJOS=[
+  {id:'v1',cat:'Módulo 1 — Fundamentos',title:'Entrena en casa con este metodo',url:'https://www.youtube.com/watch?v=orZ7klnesXs',dur:'Video'},
+  {id:'v2',cat:'Módulo 2 — Nutrición',title:'Nutricion para perder grasa abdominal',url:'https://www.youtube.com/watch?v=EwieLw_dEV0',dur:'Video'},
+  {id:'v3',cat:'Módulo 4 — Mentalidad',title:'Mentalidad para el cambio fisico',url:'https://www.youtube.com/watch?v=d0gnYKkqJsM',dur:'Video'},
+  {id:'v4',cat:'Módulo 3 — Entrenamiento',title:'Rutina de entrenamiento HSB',url:'https://www.youtube.com/watch?v=f1tOjdBYUrM',dur:'Video'}
+];
+var PDFS_FIJOS=[
+  {id:'p1',title:'El entrenamiento para la perdida de grasa abdominal',desc:'Guia completa de entrenamiento: volumen, intensidad, cardio y mas.',url:'https://drive.google.com/file/d/1mlLV60l48T3Y6Az5xxl2D6jPBkOu3XCG/view?usp=drive_link'},
+  {id:'p2',title:'Estrategias y suplementos para eliminar grasa abdominal',desc:'Calculo de calorias, macronutrientes, tipos de dieta y suplementacion.',url:'https://drive.google.com/file/d/1PwOQncoL129N8C6KQT24YTw7cgqFkQCA/view?usp=drive_link'},
+  {id:'p3',title:'La nutricion definitiva para perder la barriga',desc:'Todo sobre macronutrientes, deficit calorico y estrategias nutricionales.',url:'https://drive.google.com/file/d/1FhYe3kiguG9EeA5LWM9go2S4wdT_gMlM/view?usp=drive_link'}
+];
+
+function goTo(page){
+  ['landing-page','auth-page','dashboard-page','faq-page'].forEach(function(id){document.getElementById(id).style.display='none';});
+  document.getElementById('main-nav').style.display=page==='dashboard'?'none':'block';
+  if(page==='landing'){document.getElementById('landing-page').style.display='block';renderTesti('todos');}
+  else if(page==='auth'){document.getElementById('auth-page').style.display='flex';}
+  else if(page==='dashboard'){document.getElementById('dashboard-page').style.display='block';}
+  else if(page==='faq'){document.getElementById('faq-page').style.display='block';}
+  window.scrollTo(0,0);
+}
+
+function setAuthMode(mode){
+  document.getElementById('tab-login').classList.toggle('active',mode==='login');
+  document.getElementById('tab-register').classList.toggle('active',mode==='register');
+  document.getElementById('login-form').style.display=mode==='login'?'block':'none';
+  document.getElementById('register-form').style.display=mode==='register'?'block':'none';
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-switch').innerHTML=mode==='login'
+    ?'No tienes cuenta? <a id="btn-switch-tab" style="color:var(--red);font-weight:800;cursor:pointer;">Registrate</a>'
+    :'Ya tienes cuenta? <a id="btn-switch-tab" style="color:var(--red);font-weight:800;cursor:pointer;">Entra aqui</a>';
+  document.getElementById('btn-switch-tab').onclick=function(){setAuthMode(mode==='login'?'register':'login');};
+}
+
+function showErr(msg){var e=document.getElementById('auth-error');e.textContent=msg;e.style.display='block';}
+
+async function doLogin(){
+  document.getElementById('auth-error').style.display='none';
+  var email=document.getElementById('login-email').value.trim().toLowerCase();
+  var pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showErr('Rellena email y contrasena.');return;}
+  var res=await sb.from('usuarios').select('*').eq('email',email).eq('pass',pass).single();
+  if(res.error||!res.data){showErr('Email o contrasena incorrectos.');return;}
+  currentUser=res.data;localStorage.setItem('hsb_session',email);enterDashboard();
+}
+
+async function doRegister(){
+  document.getElementById('auth-error').style.display='none';
+  var name=document.getElementById('reg-name').value.trim();
+  var email=document.getElementById('reg-email').value.trim().toLowerCase();
+  var pass=document.getElementById('reg-pass').value;
+  var code=document.getElementById('reg-code').value.trim().toUpperCase();
+  if(!name||!email||!pass){showErr('Rellena todos los campos.');return;}
+  if(pass.length<6){showErr('La contrasena debe tener al menos 6 caracteres.');return;}
+  if(code!==CODE){showErr('Codigo de acceso incorrecto. Contacta con Diego.');return;}
+  var check=await sb.from('usuarios').select('id').eq('email',email).single();
+  if(check.data){showErr('Ya existe una cuenta con ese email.');return;}
+  var ins=await sb.from('usuarios').insert({email:email,pass:pass,nombre:name,rol:'cliente'}).select().single();
+  if(ins.error){showErr('Error al crear la cuenta. Intentalo de nuevo.');return;}
+  currentUser=ins.data;localStorage.setItem('hsb_session',email);enterDashboard();
+}
+
+async function doLogout(){currentUser=null;localStorage.removeItem('hsb_session');goTo('landing');}
+
+async function enterDashboard(){
+  document.getElementById('dash-username').textContent=currentUser.nombre;
+  document.getElementById('welcome-name').textContent='Bienvenido, '+currentUser.nombre.split(' ')[0];
+  var isAdmin=currentUser.rol==='admin';
+  document.getElementById('btn-dash-admin').style.display=isAdmin?'inline-block':'none';
+  goTo('dashboard');
+  showDashSection('campus');
+  await loadVideos();renderPdfs();await renderMacros();
+  if(isAdmin){await loadAdminData();}
+  ejInit();
+}
+
+function showDashSection(s){
+  var secs=['campus','macros','ejercicios','admin'];
+  var btns=['btn-dash-campus','btn-dash-macros','btn-dash-ejercicios','btn-dash-admin'];
+  secs.forEach(function(sec,i){
+    var el=document.getElementById('dash-'+sec);
+    var btn=document.getElementById(btns[i]);
+    if(el)el.classList.toggle('active',sec===s);
+    if(btn){
+      if(sec==='ejercicios'){
+        btn.style.background=s===sec?'var(--red)':'none';
+        btn.style.color=s===sec?'#fff':'var(--red)';
+        btn.style.border=s===sec?'2px solid var(--red)':'2px solid var(--red)';
+      } else {
+        btn.classList.toggle('active',sec===s);
+      }
+    }
+  });
+  if(s==='macros')renderMacros();
+}
+
+function showCampusTab(t){
+  document.getElementById('ctab-videos').classList.toggle('active',t==='videos');
+  document.getElementById('ctab-pdfs').classList.toggle('active',t==='pdfs');
+  document.getElementById('cpanel-videos').classList.toggle('active',t==='videos');
+  document.getElementById('cpanel-pdfs').classList.toggle('active',t==='pdfs');
+}
+
+function showAdminTab(t){
+  ['videos','pdfs','macros','usuarios'].forEach(function(tab){
+    var el=document.getElementById('atab-'+tab);var p=document.getElementById('apanel-'+tab);
+    if(el)el.classList.toggle('active',tab===t);if(p)p.classList.toggle('active',tab===t);
+  });
+}
+
+function getYtId(url){if(!url)return null;var m=url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+
+async function loadVideos(){
+  var res=await sb.from('videos').select('*').order('created_at',{ascending:true});
+  extraVideos=res.data||[];renderVideos('todos');
+}
+
+function renderVideos(cat){
+  var all=VIDEOS_FIJOS.concat(extraVideos.map(function(v){return{id:v.id,cat:v.categoria,title:v.titulo,url:v.url,dur:v.duracion||'Video'};}));
+  var cats=['todos'];all.forEach(function(v){if(cats.indexOf(v.cat)===-1)cats.push(v.cat);});
+  var fh='';cats.forEach(function(c){fh+='<button class="filter-btn'+(c===cat?' active':'')+'" onclick="renderVideos(\''+c+'\')">'+(c==='todos'?'Todos':c)+'</button>';});
+  document.getElementById('video-filters').innerHTML=fh;
+  var list=cat==='todos'?all:all.filter(function(v){return v.cat===cat;});
+  var h='';list.forEach(function(v){
+    var ytId=getYtId(v.url);
+    var bg=ytId?'url(https://img.youtube.com/vi/'+ytId+'/hqdefault.jpg) center/cover':'#111';
+    h+='<div class="video-card" onclick="openVideo(\''+v.id+'\',\''+(v.url||'')+'\',\''+(v.title||'').replace(/'/g,'')+'\')"><div class="video-thumb" style="background:'+bg+'"><div class="video-play"></div><div class="video-cat-badge">'+v.cat+'</div></div><div class="video-info"><div class="video-title">'+v.title+'</div><div class="video-meta">'+v.dur+'</div></div></div>';
+  });
+  document.getElementById('videos-grid').innerHTML=h||'<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--gray3);">Sin videos aun.</div>';
+}
+
+function openVideo(id,url,title){
+  var ytId=getYtId(url);
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-iframe').src=ytId?'https://www.youtube.com/embed/'+ytId+'?autoplay=1':'';
+  document.getElementById('video-modal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('video-modal').classList.remove('open');document.getElementById('modal-iframe').src='';}
+
+function renderPdfs(){
+  var h='';PDFS_FIJOS.forEach(function(p){h+='<div class="pdf-card"><div class="pdf-icon">&#x1F4C4;</div><div class="pdf-title">'+p.title+'</div><div class="pdf-desc">'+p.desc+'</div><a class="pdf-btn" href="'+p.url+'" target="_blank">Descargar</a></div>';});
+  document.getElementById('pdfs-grid').innerHTML=h;
+}
+
+async function renderMacros(){
+  var el=document.getElementById('macros-content');
+  el.innerHTML='<div class="loading">Cargando tu plan...</div>';
+  var res=await sb.from('progreso').select('*').eq('usuario_id',currentUser.id).single();
+  if(res.error||!res.data||!res.data.calorias){el.innerHTML='<div class="macros-empty"><div style="font-size:48px;margin-bottom:1rem;">&#x1F957;</div><div style="font-size:18px;font-weight:800;margin-bottom:.5rem;">Plan nutricional personalizado</div><div style="font-size:14px;">Diego asignara tus macros cuando empieces el programa.</div></div>';return;}
+  var plan=res.data;
+  var proPct=Math.round((plan.proteinas*4/plan.calorias)*100);
+  var carbPct=Math.round((plan.carbohidratos*4/plan.calorias)*100);
+  var fatPct=Math.round((plan.grasas*9/plan.calorias)*100);
+  var h='<div class="macros-card"><h3>Tu objetivo diario</h3>';
+  h+='<div class="macro-row"><div class="macro-label">Calorias</div><div class="macro-bar-wrap"><div class="macro-bar-fill" style="width:100%;background:var(--black);"></div></div><div class="macro-val">'+plan.calorias+'<span class="macro-unit">kcal</span></div></div>';
+  h+='<div class="macro-row"><div class="macro-label">Proteinas</div><div class="macro-bar-wrap"><div class="macro-bar-fill" style="width:'+proPct+'%;"></div></div><div class="macro-val">'+plan.proteinas+'<span class="macro-unit">g</span></div></div>';
+  h+='<div class="macro-row"><div class="macro-label">Carbohidratos</div><div class="macro-bar-wrap"><div class="macro-bar-fill" style="width:'+carbPct+'%;background:#f5a623;"></div></div><div class="macro-val">'+plan.carbohidratos+'<span class="macro-unit">g</span></div></div>';
+  h+='<div class="macro-row"><div class="macro-label">Grasas</div><div class="macro-bar-wrap"><div class="macro-bar-fill" style="width:'+fatPct+'%;background:#4a90e2;"></div></div><div class="macro-val">'+plan.grasas+'<span class="macro-unit">g</span></div></div></div>';
+  if(plan.nota)h+='<div class="macros-card"><h3>Nota de Diego</h3><p style="font-size:15px;color:#444;line-height:1.7;">'+plan.nota+'</p></div>';
+  el.innerHTML=h;
+}
+
+async function loadAdminData(){
+  var resU=await sb.from('usuarios').select('*').order('created_at',{ascending:false});
+  allUsers=resU.data||[];
+  var resV=await sb.from('videos').select('*').order('created_at',{ascending:true});
+  extraVideos=resV.data||[];
+  renderAdmin();renderAdminMacroSelect();renderAdminMacrosList();
+}
+
+function renderAdmin(){
+  var uh='';allUsers.forEach(function(u){
+    uh+='<div class="item-row"><div><div class="item-name">'+u.nombre+'</div><div class="item-sub">'+u.email+'</div></div>';
+    uh+=u.rol!=='admin'?'<button class="btn-del" onclick="delUser(\''+u.id+'\')">Eliminar</button>':'<span style="font-size:12px;color:var(--gray3);font-weight:700;">Admin</span>';
+    uh+='</div>';
+  });
+  document.getElementById('user-list').innerHTML=uh||'<p style="font-size:14px;color:var(--gray3);">Sin clientes aun.</p>';
+  var vh='';
+  VIDEOS_FIJOS.forEach(function(v){vh+='<div class="item-row"><div><div class="item-name">'+v.title+'</div><div class="item-sub">'+v.cat+' - Fijo</div></div><span style="font-size:12px;color:var(--gray3);font-weight:700;">Fijo</span></div>';});
+  extraVideos.forEach(function(v){vh+='<div class="item-row"><div><div class="item-name">'+v.titulo+'</div><div class="item-sub">'+v.categoria+'</div></div><button class="btn-del" onclick="delVideo(\''+v.id+'\')">Eliminar</button></div>';});
+  document.getElementById('video-admin-list').innerHTML=vh;
+  var ph='';PDFS_FIJOS.forEach(function(p){ph+='<div class="item-row"><div><div class="item-name">'+p.title+'</div><div class="item-sub">Fijo</div></div><span style="font-size:12px;color:var(--gray3);font-weight:700;">Fijo</span></div>';});
+  document.getElementById('pdf-admin-list').innerHTML=ph;
+}
+
+function renderAdminMacroSelect(){
+  var h='';allUsers.forEach(function(u){h+='<option value="'+u.id+'">'+u.nombre+' ('+u.email+')</option>';});
+  document.getElementById('macro-client-select').innerHTML=h||'<option>Sin clientes</option>';
+}
+
+async function renderAdminMacrosList(){
+  var res=await sb.from('progreso').select('*, usuarios(nombre, email)');
+  var list=res.data||[];var h='';
+  list.forEach(function(p){
+    var nombre=p.usuarios?p.usuarios.nombre:'Desconocido';
+    h+='<div class="item-row"><div><div class="item-name">'+nombre+'</div><div class="item-sub">'+p.calorias+' kcal - Pro: '+p.proteinas+'g Carb: '+p.carbohidratos+'g Gra: '+p.grasas+'g</div></div><button class="btn-del" onclick="delMacros(\''+p.id+'\')">Eliminar</button></div>';
+  });
+  document.getElementById('macros-admin-list').innerHTML=h||'<p style="font-size:14px;color:var(--gray3);">Sin planes asignados.</p>';
+}
+
+async function saveMacros(){
+  var uid=document.getElementById('macro-client-select').value;
+  var cal=parseInt(document.getElementById('macro-cal').value)||0;
+  var pro=parseInt(document.getElementById('macro-pro').value)||0;
+  var carb=parseInt(document.getElementById('macro-carb').value)||0;
+  var fat=parseInt(document.getElementById('macro-fat').value)||0;
+  var note=document.getElementById('macro-note').value.trim();
+  if(!cal){alert('Introduce las calorias.');return;}
+  var existing=await sb.from('progreso').select('id').eq('usuario_id',uid).single();
+  if(existing.data){await sb.from('progreso').update({calorias:cal,proteinas:pro,carbohidratos:carb,grasas:fat,nota:note}).eq('usuario_id',uid);}
+  else{await sb.from('progreso').insert({usuario_id:uid,calorias:cal,proteinas:pro,carbohidratos:carb,grasas:fat,nota:note});}
+  document.getElementById('macro-cal').value='';document.getElementById('macro-pro').value='';
+  document.getElementById('macro-carb').value='';document.getElementById('macro-fat').value='';
+  document.getElementById('macro-note').value='';
+  await renderAdminMacrosList();alert('Plan guardado. El cliente lo vera al entrar en Mis macros.');
+}
+
+async function delMacros(id){if(!confirm('Eliminar plan?'))return;await sb.from('progreso').delete().eq('id',id);await renderAdminMacrosList();}
+
+async function addVideo(){
+  var title=document.getElementById('v-title').value.trim();
+  var cat=document.getElementById('v-cat').value;
+  var url=document.getElementById('v-url').value.trim();
+  var dur=document.getElementById('v-dur').value.trim();
+  if(!title){alert('Anade un titulo.');return;}
+  await sb.from('videos').insert({titulo:title,categoria:cat,url:url,duracion:dur||'-'});
+  document.getElementById('v-title').value='';document.getElementById('v-url').value='';document.getElementById('v-dur').value='';
+  await loadVideos();await loadAdminData();alert('Video anadido.');
+}
+
+async function delVideo(id){if(!confirm('Eliminar video?'))return;await sb.from('videos').delete().eq('id',id);await loadVideos();await loadAdminData();}
+async function delUser(id){if(!confirm('Eliminar usuario?'))return;await sb.from('usuarios').delete().eq('id',id);await loadAdminData();}
+
+var TESTI=[
+  {name:'Carlos M.',age:'52 años',result:'-14 kg',tag:'perdida',text:'Llevaba 8 años intentando quitarme la barriga. Dietas, gimnasio, apps... nada funcionaba. Con Diego lo conseguí en 5 meses sin dejar de comer lo que me gusta.'},
+  {name:'Javier R.',age:'47 años',result:'-11 kg',tag:'habitos',text:'Lo mejor no fue el peso perdido. Fue entender por qué fallaba siempre antes y tener un sistema que puedo mantener solo, sin que nadie me vigile.'},
+  {name:'Miguel S.',age:'55 años',result:'+Energía',tag:'energia',text:'Viajo constantemente por trabajo y pensaba que era imposible seguir un plan. Diego me demostró que estaba equivocado.'},
+  {name:'Roberto L.',age:'43 años',result:'-9 kg',tag:'perdida',text:'En 4 meses bajé 9 kilos sin pasar hambre. Es lo primero que funciona en años.'},
+  {name:'Andrés P.',age:'50 años',result:'Cambio total',tag:'energia',text:'Recuperé energía que no tenía desde los 30. Duermo mejor, me muevo mejor y mi mujer dice que parezco otro.'},
+  {name:'David F.',age:'44 años',result:'-12 kg',tag:'habitos',text:'El sistema de equivalencias es lo más útil que he aprendido. Ahora como de todo, salgo a cenar con amigos y sigo perdiendo grasa.'},
+  {name:'Sergio V.',age:'49 años',result:'-8 kg',tag:'perdida',text:'Tengo una empresa y apenas tengo tiempo. Diego adaptó el programa a mi realidad, no al revés.'},
+  {name:'Fernando C.',age:'51 años',result:'+Fuerza',tag:'energia',text:'No quería adelgazar para verme bien en el espejo. Quería poder jugar con mis hijos sin quedarme sin aliento.'},
+  {name:'Pablo H.',age:'46 años',result:'-10 kg',tag:'habitos',text:'Antes compensaba el estrés comiendo. Diego me ayudó a cambiar esa relación con la comida sin prohibirme nada.'},
+  {name:'Marcos T.',age:'39 años',result:'-7 kg',tag:'perdida',text:'Empecé el programa con dudas porque había gastado mucho dinero en cosas que no funcionaron. Diego es diferente.'},
+  {name:'Ignacio B.',age:'53 años',result:'Más salud',tag:'energia',text:'Mi médico me había dicho que tenía que bajar de peso. En 6 meses mis analíticas mejoraron y bajé 11 kilos.'},
+  {name:'Raúl N.',age:'45 años',result:'-6 kg',tag:'habitos',text:'Lo que más valoro es la disponibilidad de Diego. Cuando tenía una duda o un mal día, siempre estaba ahí.'}
+];
+
+function renderTesti(tag){
+  var list=tag==='todos'?TESTI:TESTI.filter(function(t){return t.tag===tag;});
+  var h='';list.forEach(function(t){h+='<div class="t-card"><div class="t-top"><div><div class="t-name">'+t.name+'</div><div class="t-age">'+t.age+'</div></div><div class="t-result">'+t.result+'</div></div><div class="t-text">"'+t.text+'"</div></div>';});
+  document.getElementById('testimonios-grid').innerHTML=h;
+}
+
+var faqItems=document.querySelectorAll('.faq-item');
+faqItems.forEach(function(el){el.addEventListener('click',function(){this.classList.toggle('open');});});
+
+// EVENTOS
+document.getElementById('btn-logo').onclick=function(){goTo('landing');};
+document.getElementById('btn-acceso').onclick=function(){goTo('auth');};
+document.getElementById('btn-faq-nav').onclick=function(){goTo('faq');};
+document.getElementById('btn-faq-footer').onclick=function(){goTo('faq');};
+document.getElementById('btn-acceso-footer').onclick=function(){goTo('auth');};
+document.getElementById('btn-quiensoy').onclick=function(){goTo('landing');setTimeout(function(){document.getElementById('sobre-section').scrollIntoView({behavior:'smooth'});},100);};
+document.getElementById('btn-testimonios-nav').onclick=function(){goTo('landing');setTimeout(function(){document.getElementById('testimonios-section').scrollIntoView({behavior:'smooth'});},100);};
+document.getElementById('btn-sabemas').onclick=function(){document.getElementById('sobre-section').scrollIntoView({behavior:'smooth'});};
+document.getElementById('btn-wp-hero').onclick=function(){window.open(WA,'_blank');};
+document.getElementById('btn-wp-cta').onclick=function(){window.open(WA,'_blank');};
+document.getElementById('btn-wp-faq').onclick=function(){window.open(WA,'_blank');};
+document.getElementById('tab-login').onclick=function(){setAuthMode('login');};
+document.getElementById('tab-register').onclick=function(){setAuthMode('register');};
+document.getElementById('btn-login').onclick=function(){doLogin();};
+document.getElementById('btn-register').onclick=function(){doRegister();};
+document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+document.getElementById('btn-logout').onclick=function(){doLogout();};
+document.getElementById('btn-dash-campus').onclick=function(){showDashSection('campus');};
+document.getElementById('btn-dash-macros').onclick=function(){showDashSection('macros');};
+document.getElementById('btn-dash-ejercicios').onclick=function(){showDashSection('ejercicios');};
+document.getElementById('btn-dash-admin').onclick=function(){showDashSection('admin');};
+document.getElementById('ctab-videos').onclick=function(){showCampusTab('videos');};
+document.getElementById('ctab-pdfs').onclick=function(){showCampusTab('pdfs');};
+document.getElementById('atab-videos').onclick=function(){showAdminTab('videos');};
+document.getElementById('atab-pdfs').onclick=function(){showAdminTab('pdfs');};
+document.getElementById('atab-macros').onclick=function(){showAdminTab('macros');};
+document.getElementById('atab-usuarios').onclick=function(){showAdminTab('usuarios');};
+document.getElementById('btn-add-video').onclick=function(){addVideo();};
+document.getElementById('btn-add-pdf').onclick=function(){alert('Los PDFs fijos ya estan en la plataforma.');};
+document.getElementById('btn-save-macros').onclick=function(){saveMacros();};
+document.getElementById('btn-close-modal').onclick=function(){closeModal();};
+document.getElementById('tf-todos').onclick=function(){document.querySelectorAll('.t-filters .filter-btn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');renderTesti('todos');};
+document.getElementById('tf-perdida').onclick=function(){document.querySelectorAll('.t-filters .filter-btn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');renderTesti('perdida');};
+document.getElementById('tf-energia').onclick=function(){document.querySelectorAll('.t-filters .filter-btn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');renderTesti('energia');};
+document.getElementById('tf-habitos').onclick=function(){document.querySelectorAll('.t-filters .filter-btn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');renderTesti('habitos');};
+
+// INICIO
+(async function(){
+  var saved=localStorage.getItem('hsb_session');
+  if(saved){var res=await sb.from('usuarios').select('*').eq('email',saved).single();if(res.data){currentUser=res.data;enterDashboard();return;}}
+  goTo('landing');setAuthMode('login');
+})();
+</script>
+</body>
+</html>
